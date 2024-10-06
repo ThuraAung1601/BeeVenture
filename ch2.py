@@ -164,7 +164,7 @@ while running:
         draw_sprite(health_img, health[0], health[1])
 
     # Draw the lives and score
-    draw_text(f"Task: Collect 20 points!!!", font, WHITE, screen, 10, 10)
+    draw_text(f"Task: Collect 15 points!!!", font, WHITE, screen, 10, 10)
     draw_text(f"Lives: {lives}", font, WHITE, screen, 10, 40)
     draw_text(f"Points: {score}", font, WHITE, screen, 10, 70)
     
