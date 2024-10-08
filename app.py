@@ -23,7 +23,7 @@ font = pygame.font.Font("./assets/happyBeige.ttf", 74)
 button_font = pygame.font.Font("./assets/happyBeige.ttf", 50)
 
 # Define button labels
-buttons = ["Level 1", "Level 2", "Level 3", "Help (?)", "Quit"]
+buttons = ["Chapter 1", "Chapter 2", "Chapter 3", "Help (?)", "Quit"]
 selected_index = 0
 
 # Set up GPIO
