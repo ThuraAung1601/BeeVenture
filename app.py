@@ -12,6 +12,7 @@ screen_width = 800
 screen_height = 600
 black = (0, 0, 0)
 white = (255, 255, 255)
+yellow = (255, 100, 0)
 
 # Set up the display
 screen = pygame.display.set_mode((screen_width, screen_height))
@@ -63,7 +64,7 @@ try:
         screen.fill(black)  # Clear screen with black color
 
         # Title
-        title_label = font.render("BeeVenture", True, white)
+        title_label = font.render("BeeVenture", True, yellow)
         title_rect = title_label.get_rect(center=(screen_width // 2, 100))
         screen.blit(title_label, title_rect)
 
@@ -89,11 +90,11 @@ try:
                 pygame.quit()  # Quit Pygame
                 GPIO.cleanup()  # Clean up GPIO
                 sys.exit()     # Exit the program
-            elif selected_button == "Level 1":
-                os.system("python testAni.py")  # Run level 1 script
-            elif selected_button == "Level 2":
-                os.system("python test.py")  # Run level 2 script
-            elif selected_button == "Level 3":
+            elif selected_button == "Chapter 1":
+                os.system("python ch1.py")  # Run level 1 script
+            elif selected_button == "Chapter 2":
+                os.system("python ch2.py")  # Run level 2 script
+            elif selected_button == "Chapter 3":
                 os.system("python test3.py")  # Run level 3 script
             else:
                 print(f"Pressed: {selected_button}")  # Print the selected button
