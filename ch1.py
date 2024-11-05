@@ -2,6 +2,7 @@ import pygame
 import time
 import random
 from mpu6050 import mpu6050
+import RPi.GPIO as GPIO
 
 # Initialize Pygame
 pygame.init()
@@ -10,7 +11,7 @@ pygame.init()
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Chapter 1")
+pygame.display.set_caption("Chapter 1: Into the field")
 
 # Colors
 BLACK = (0, 0, 0)
@@ -47,9 +48,23 @@ obstacles = []  # List to store obstacles
 # Initialize MPU6050
 sensor = mpu6050(0x68)
 
-# Main loop
-running = True
-clock = pygame.time.Clock()
+# GPIO setup
+BUTTON_1_PIN = 17  # Button 1 pin
+BUZZER_PIN = 24    # Buzzer pin
+LED_PIN1 = 22      # LED pin
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
+GPIO.setup(BUTTON_1_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUZZER_PIN, GPIO.OUT)
+GPIO.setup(LED_PIN1, GPIO.OUT)
+
+# Ensure the buzzer and LED are off initially
+GPIO.output(BUZZER_PIN, GPIO.LOW)
+GPIO.output(LED_PIN1, GPIO.LOW)
+
+# Pause state
+paused = False
 
 # Function to draw text
 def draw_text(text, font, color, surface, x, y):
@@ -77,11 +92,30 @@ def draw_obstacle(x, gap_y):
     # Draw the bottom obstacle (lava tile)
     screen.blit(bottom_lava, (x, gap_y + obstacle_gap))
 
-# Main game loop
+# Pause game
+def toggle_pause():
+    global paused
+    paused = not paused
+    if paused:
+        draw_text("Paused", font, WHITE, screen, SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT // 2)
+        pygame.display.flip()
+
+# Main loop
+running = True
+clock = pygame.time.Clock()
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+    # Button 1 pause toggle
+    if GPIO.input(BUTTON_1_PIN) == GPIO.HIGH:
+        toggle_pause()
+        time.sleep(0.3)  # Debounce delay for button press
+
+    if paused:
+        continue  # Skip the game loop if paused
 
     # Get gyro data
     accel_data = sensor.get_accel_data()
@@ -116,9 +150,18 @@ while running:
     for obstacle in obstacles:
         top_rect = pygame.Rect(obstacle[0], 0, obstacle_width, obstacle[1])
         bottom_rect = pygame.Rect(obstacle[0], obstacle[1] + obstacle_gap, obstacle_width, SCREEN_HEIGHT - (obstacle[1] + obstacle_gap))
+        
         if player_rect.colliderect(top_rect) or player_rect.colliderect(bottom_rect):
             lives -= 1
-            obstacles.remove(obstacle)
+
+            # Buzzer and LED feedback for life loss
+            GPIO.output(BUZZER_PIN, GPIO.HIGH)  # Turn on buzzer
+            GPIO.output(LED_PIN1, GPIO.HIGH)    # Turn on LED
+            time.sleep(0.1)                     # Short delay for feedback
+            GPIO.output(BUZZER_PIN, GPIO.LOW)   # Turn off buzzer
+            GPIO.output(LED_PIN1, GPIO.LOW)     # Turn off LED
+
+            obstacles.remove(obstacle)  # Remove the collided obstacle
             if lives <= 0:
                 running = False
 
@@ -153,6 +196,7 @@ else:
     draw_text(f"Final Barriers: {score}", font, WHITE, screen, SCREEN_WIDTH // 2 - 100, SCREEN_HEIGHT // 2 + 40)
 
 pygame.display.flip()
-time.sleep(5)
+time.sleep(3)
 
 pygame.quit()
+GPIO.cleanup()
