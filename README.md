@@ -1,5 +1,10 @@
 # BeeVenture
 
+For detailed documentation, click [here](docs/readme.md).
+
+### Setup 
+
+For detailed setup with tests, click [here](docs/setup.md).
 
 1. Virtual Environment Create
 ```
