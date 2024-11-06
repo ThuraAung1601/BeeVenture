@@ -1,6 +1,6 @@
 # BeeVenture
 
-For detailed documentation, click [here](docs/readme.md).
+More about project, click [here](docs/readme.md).
 
 ### Setup 
 
