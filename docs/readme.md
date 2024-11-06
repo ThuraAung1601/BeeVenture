@@ -65,6 +65,11 @@ The game mechanics define how the game world behaves and interacts with the play
   - **Health Items**: Health items work similarly to food items but provide the player with an extra life when collected. The player can collect health items to increase their lives, but the maximum number of lives is capped to three.
   - **Boss Mechanics**: The boss enemy is introduced when the player’s score reaches 10. The boss has higher health and periodically shoots bullets at the player. The player must shoot the boss with their bullets to reduce its health, and if the boss’s health reaches zero, the player wins the game.
 
+#### **Pause Button**
+The game can be paused at any time by pressing the pause button (connected to a GPIO pin). This button is also monitored through a separate thread, ensuring the pause action can occur independently of the game loop.
+Pause Behavior: When the pause button is pressed, the game enters a paused state where the game logic halts temporarily. The screen shows a “Game Paused” message, and all movement, shooting, and enemy actions are suspended.
+Resuming the Game: The game can be resumed by pressing the pause button again, returning the game to its normal state. This allows the player to take a break without exiting the game.
+
 #### **Multithreading**
 Multithreading is used to handle multiple tasks concurrently, allowing the game to be more responsive and interactive. The primary use of multithreading in this project is for the shooting mechanism:
 
