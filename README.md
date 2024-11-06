@@ -2,6 +2,10 @@
 
 More about project, click [here](docs/readme.md).
 
+### Team
+- Thura Aung 66011606
+- Ei Myat Nwe 66011534
+  
 ### Setup 
 
 For detailed setup with tests, click [here](docs/setup.md).
@@ -31,7 +35,3 @@ python app.py
 ### Our Custom Game Controller 
 
 ### How to Play Our Game
-
-### Team
-- Ei Myat Nwe 66011534
-- Thura Aung 66011606
