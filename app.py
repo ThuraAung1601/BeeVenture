@@ -1,107 +1,118 @@
 import pygame
-import sys
-import os
 import RPi.GPIO as GPIO
 import time
+import os
+
+# GPIO Pin configuration
+BUTTON_1_PIN = 17  # Choose option
+BUTTON_2_PIN = 27  # Select option
+BUZZER_PIN = 24    # Buzzer
+
+# Initialize GPIO
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BUTTON_1_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUTTON_2_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(BUZZER_PIN, GPIO.OUT)
 
 # Initialize Pygame
 pygame.init()
 
-# Screen dimensions and colors
-screen_width = 800
-screen_height = 600
-black = (0, 0, 0)
-white = (255, 255, 255)
-yellow = (255, 100, 0)
+# Screen settings
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("BeeVenture")
+font = pygame.font.Font("./assets/happyBeige.ttf", 32)
+clock = pygame.time.Clock()
 
-# Set up the display
-screen = pygame.display.set_mode((screen_width, screen_height))
-pygame.display.set_caption("Front Page")
+# Options list
+options = ["Chapter 1", "Chapter 2", "Help", "Quit"]
+current_option = 0
 
-# Font settings
-font = pygame.font.Font("./assets/happyBeige.ttf", 74)
-button_font = pygame.font.Font("./assets/happyBeige.ttf", 50)
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+HIGHLIGHT = (0, 255, 0)
+ORANGE = (255, 165, 0)
 
-# Define button labels
-buttons = ["Chapter 1", "Chapter 2", "Chapter 3", "Help (?)", "Quit"]
-selected_index = 0
+# Load Help Images
+help_image1 = pygame.image.load("./assets/help1.png")
+help_image2 = pygame.image.load("./assets/help2.png")
+help_image1 = pygame.transform.scale(help_image1, (350, 300))
+help_image2 = pygame.transform.scale(help_image2, (350, 300))
 
-# Set up GPIO
-GPIO.setmode(GPIO.BOARD)  # Use physical pin numbering
-button_pin1 = 11  # Button 1 for navigating up
-button_pin2 = 13  # Button 2 for selecting
-led_pins = [36, 38, 40]  # LED pins
+# Helper function to play tune on buzzer
+def play_buzzer_tune():
+    GPIO.output(BUZZER_PIN, GPIO.HIGH)
+    time.sleep(0.1)
+    GPIO.output(BUZZER_PIN, GPIO.LOW)
+    time.sleep(0.1)
 
-# Set up the LED pins
-for pin in led_pins:
-    GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)  # Initialize LEDs to OFF
+# Function to display options
+def display_options():
+    screen.fill(BLACK)
 
-GPIO.setup(button_pin1, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(button_pin2, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+    # Title: "BeeVenture"
+    title_text = font.render("BeeVenture", True, ORANGE)
+    screen.blit(title_text, (SCREEN_WIDTH // 2 - title_text.get_width() // 2, 50))
 
-def draw_buttons():
-    for i, button in enumerate(buttons):
-        if i == selected_index:
-            label = button_font.render(button, True, white)
-        else:
-            label = button_font.render(button, True, (100, 100, 100))  # dimmed color for unselected
-        text_rect = label.get_rect(center=(screen_width // 2, 200 + i * 60))
-        screen.blit(label, text_rect)
+    # Options
+    for i, option in enumerate(options):
+        color = HIGHLIGHT if i == current_option else WHITE
+        text = font.render(option, True, color)
+        text_rect = text.get_rect(center=(SCREEN_WIDTH // 2, 150 + i * 60))
+        screen.blit(text, text_rect)
+    
+    pygame.display.flip()
 
-def blink_leds():
-    for _ in range(3):  # Blink 3 times
-        for pin in led_pins:
-            GPIO.output(pin, GPIO.HIGH)  # Turn on LEDs
-        time.sleep(0.1)  # Keep LEDs on for 100ms
-        for pin in led_pins:
-            GPIO.output(pin, GPIO.LOW)  # Turn off LEDs
-        time.sleep(0.1)  # Keep LEDs off for 100ms
+# Help page function
+def show_help_page():
+    screen.fill(BLACK)
+    screen.blit(help_image1, (50, 150))  # Position of help1.png
+    screen.blit(help_image2, (400, 150))  # Position of help2.png
+    home_text = font.render("Press Button 1 or 2 to return", True, WHITE)
+    screen.blit(home_text, (200, 500))
+    pygame.display.flip()
+
+    # Wait for button press to return to main menu
+    while True:
+        if GPIO.input(BUTTON_1_PIN) == GPIO.HIGH or GPIO.input(BUTTON_2_PIN) == GPIO.HIGH:
+            time.sleep(0.5)  # Debounce delay
+            break
 
 # Main loop
 try:
     while True:
-        screen.fill(black)  # Clear screen with black color
+        display_options()
 
-        # Title
-        title_label = font.render("BeeVenture", True, yellow)
-        title_rect = title_label.get_rect(center=(screen_width // 2, 100))
-        screen.blit(title_label, title_rect)
+        # Check GPIO buttons for navigation and selection
+        if GPIO.input(BUTTON_1_PIN) == GPIO.HIGH:
+            current_option = (current_option + 1) % len(options)
+            time.sleep(0.2)  # Debounce delay
 
-        # Draw buttons
-        draw_buttons()
+        if GPIO.input(BUTTON_2_PIN) == GPIO.HIGH:
+            play_buzzer_tune()  # Play buzzer only when button 2 is pressed
+            selected_option = options[current_option]
+            if selected_option == "Chapter 1":
+                os.system("python3 ch1.py")  # Run Chapter 1 script
+            elif selected_option == "Chapter 2":
+                os.system("python3 ch3.py")  # Run Chapter 2 script
+            elif selected_option == "Help":
+                show_help_page()  # Display help page
+            elif selected_option == "Quit":
+                print("Exiting the program.")
+                break  # Exit the main loop
+            time.sleep(0.2)  # Debounce delay
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                GPIO.cleanup()  # Clean up GPIO
-                sys.exit()
+                GPIO.cleanup()
+                exit()
 
-        # Check GPIO inputs for button presses
-        if GPIO.input(button_pin1) == GPIO.HIGH:  # Button 1
-            selected_index = (selected_index - 1) % len(buttons)  # Navigate up
-            time.sleep(0.2)  # Debounce delay
-
-        if GPIO.input(button_pin2) == GPIO.HIGH:  # Button 2
-            selected_button = buttons[selected_index]
-            blink_leds()  # Blink LEDs on select button press
-            
-            if selected_button == "Quit":
-                pygame.quit()  # Quit Pygame
-                GPIO.cleanup()  # Clean up GPIO
-                sys.exit()     # Exit the program
-            elif selected_button == "Chapter 1":
-                os.system("python ch1.py")  # Run level 1 script
-            elif selected_button == "Chapter 2":
-                os.system("python ch2.py")  # Run level 2 script
-            elif selected_button == "Chapter 3":
-                os.system("python test3.py")  # Run level 3 script
-            else:
-                print(f"Pressed: {selected_button}")  # Print the selected button
-            time.sleep(0.2)  # Debounce delay
-
-        pygame.display.flip()  # Update the display
+        clock.tick(30)  # Limit frame rate
 
 finally:
-    # Clean up GPIO on exit
     GPIO.cleanup()
+    pygame.quit()
+    print("GPIO cleaned up and program ended.")
