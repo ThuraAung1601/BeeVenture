@@ -1,18 +1,17 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='YourGame',
+    name='BeeVenture',
     version='0.1',
     packages=find_packages(),
     install_requires=[
         'pygame',
         'RPi.GPIO',
-        'smbus',
-        'numpy',
+        'mpu6050-raspberrypi'
     ],
     entry_points={
         'console_scripts': [
-            'yourgame=yourgame.main:main',
+            'beeventure=beeventure.app:main',
         ],
     },
 )
