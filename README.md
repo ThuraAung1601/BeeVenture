@@ -33,6 +33,7 @@ python app.py
 ### Schematic Diagram
 
 ### Our Custom Game Controller 
-![here](assets/Subject.png).
+![ours](assets/Subject.png).
 
 ### How to Play Our Game
+![how](How.png).
