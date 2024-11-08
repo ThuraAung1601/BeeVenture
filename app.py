@@ -95,9 +95,9 @@ try:
             # Demonstrating Blocking Execution style
             selected_option = options[current_option]
             if selected_option == "Chapter 1":
-                os.system("python3 ch1.py")  # Run Chapter 1 script
+                os.system("python ch1.py")  # Run Chapter 1 script
             elif selected_option == "Chapter 2":
-                os.system("python3 ch2.py")  # Run Chapter 2 script
+                os.system("python ch2.py")  # Run Chapter 2 script
             elif selected_option == "Help":
                 show_help_page()  # Display help page
             elif selected_option == "Quit":
