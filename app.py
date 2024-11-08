@@ -92,6 +92,7 @@ try:
 
         if GPIO.input(BUTTON_2_PIN) == GPIO.HIGH:
             play_buzzer_tune()  # Play buzzer only when button 2 is pressed
+            # Demonstrating Blocking Execution style
             selected_option = options[current_option]
             if selected_option == "Chapter 1":
                 os.system("python3 ch1.py")  # Run Chapter 1 script
